@@ -35,7 +35,9 @@ class EraBreakdownRow(BaseModel):
 
 class ComparisonResponse(BaseModel):
     user_a_id: UUID
+    user_a_display_name: str | None
     user_b_id: UUID
+    user_b_display_name: str | None
     overall_score: float
     era_score: float
     artist_score: float

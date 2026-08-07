@@ -23,7 +23,9 @@ def compare_users(
     comparison = get_or_build_comparison(db, user_a, user_b)
     return ComparisonResponse(
         user_a_id=comparison.user_a_id,
+        user_a_display_name=user_a.display_name,
         user_b_id=comparison.user_b_id,
+        user_b_display_name=user_b.display_name,
         overall_score=comparison.overall_score,
         era_score=comparison.era_score,
         artist_score=comparison.artist_score,

@@ -75,7 +75,9 @@ def test_compare_users_builds_and_returns_comparison(db_session: Session, monkey
     assert response.status_code == 200
     body = response.json()
     assert body["user_a_id"] == str(user_a_id)
+    assert body["user_a_display_name"] == "Test User A"
     assert body["user_b_id"] == str(user_b_id)
+    assert body["user_b_display_name"] == "Test User B"
     # shared {a1}, union {a1, a2, a3} -> 1/3
     assert body["artist_score"] == pytest.approx(1 / 3)
     assert body["shared_artists"] == [
