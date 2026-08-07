@@ -5,6 +5,7 @@ from app.services.profile_builder import (
     compute_artist_weights,
     compute_era_vector,
     compute_top_track_pool,
+    compute_track_meta,
     compute_track_weights,
 )
 
@@ -99,3 +100,22 @@ def test_compute_era_vector_missing_release_date_is_skipped():
     track_weights = compute_track_weights(top_tracks_by_range)
 
     assert compute_era_vector(top_tracks_by_range, track_weights) == {}
+
+
+def test_compute_track_meta_extracts_name_artists_and_decade():
+    top_tracks_by_range = {
+        "medium_term": [
+            {
+                "id": "t1",
+                "name": "Song One",
+                "artists": [{"id": "a1"}, {"id": "a2"}],
+                "album": {"release_date": "2015-06-01"},
+            }
+        ],
+        "short_term": [],
+        "long_term": [],
+    }
+
+    assert compute_track_meta(top_tracks_by_range) == {
+        "t1": {"name": "Song One", "artist_ids": ["a1", "a2"], "decade": "2010s"}
+    }

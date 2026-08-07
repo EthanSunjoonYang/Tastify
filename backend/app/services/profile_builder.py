@@ -56,6 +56,21 @@ def _decade_bucket(release_date: str) -> str | None:
     return f"{(int(year_str) // 10) * 10}s"
 
 
+def compute_track_meta(top_tracks_by_range: dict[str, list[dict]]) -> dict[str, dict]:
+    """Per-track name/artists/decade, cached so playlist generation never needs a
+    second round of Spotify API calls to know what a track_id actually is."""
+    meta: dict[str, dict] = {}
+    for tracks in top_tracks_by_range.values():
+        for track in tracks:
+            release_date = track.get("album", {}).get("release_date", "")
+            meta[track["id"]] = {
+                "name": track.get("name", ""),
+                "artist_ids": [artist["id"] for artist in track.get("artists", [])],
+                "decade": _decade_bucket(release_date),
+            }
+    return meta
+
+
 def compute_era_vector(
     top_tracks_by_range: dict[str, list[dict]], track_weights: dict[str, float]
 ) -> dict[str, float]:

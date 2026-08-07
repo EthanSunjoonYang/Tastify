@@ -44,3 +44,17 @@ def fetch_top_tracks_by_range(sp: spotipy.Spotify) -> dict[str, list[dict]]:
         ]
         for time_range in TIME_RANGES
     }
+
+
+def create_playlist(
+    sp: spotipy.Spotify, spotify_user_id: str, name: str, description: str
+) -> str:
+    playlist = sp.user_playlist_create(
+        spotify_user_id, name, public=True, description=description
+    )
+    return playlist["id"]
+
+
+def add_tracks_to_playlist(sp: spotipy.Spotify, playlist_id: str, track_ids: list[str]) -> None:
+    uris = [f"spotify:track:{track_id}" for track_id in track_ids]
+    sp.playlist_add_items(playlist_id, uris)
