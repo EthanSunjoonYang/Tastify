@@ -39,7 +39,7 @@ def generate_playlist(db: Session, user_a: User, user_b: User) -> Comparison:
     # is authorizing this request.
     access_token = ensure_valid_access_token(db, user_a)
     sp = get_client(access_token)
-    playlist_id = create_playlist(sp, user_a.spotify_id, playlist_name, description)
+    playlist_id = create_playlist(sp, playlist_name, description)
     add_tracks_to_playlist(sp, playlist_id, track_ids)
 
     comparison.playlist_track_ids = track_ids

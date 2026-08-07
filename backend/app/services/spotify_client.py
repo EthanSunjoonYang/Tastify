@@ -46,15 +46,29 @@ def fetch_top_tracks_by_range(sp: spotipy.Spotify) -> dict[str, list[dict]]:
     }
 
 
-def create_playlist(
-    sp: spotipy.Spotify, spotify_user_id: str, name: str, description: str
-) -> str:
-    playlist = sp.user_playlist_create(
-        spotify_user_id, name, public=True, description=description
-    )
+def create_playlist(sp: spotipy.Spotify, name: str, description: str, public: bool = False) -> str:
+    # spotipy's user_playlist_create() still posts to the old users/{id}/playlists
+    # path, which Spotify's Feb 2026 Web API migration turned into a hard 403 for
+    # every caller (not just new apps -- verified live). POST /me/playlists is
+    # the documented replacement and doesn't need the user id at all.
+    #
+    # Known Spotify-side bug (verified live, both on create and via a follow-up
+    # PUT /playlists/{id}): the public flag is accepted and echoed back
+    # correctly in the response, but not actually honored -- every playlist
+    # ends up public regardless. Left as public=False here since that's the
+    # correct request; nothing we can do differently until Spotify fixes it.
+    payload = {
+        "name": name,
+        "public": public,
+        "collaborative": False,
+        "description": description,
+    }
+    playlist = sp._post("me/playlists", payload=payload)
     return playlist["id"]
 
 
 def add_tracks_to_playlist(sp: spotipy.Spotify, playlist_id: str, track_ids: list[str]) -> None:
+    # Same migration: playlist_add_items() posts to the old .../tracks path.
+    # POST /playlists/{id}/items is the replacement (verified live).
     uris = [f"spotify:track:{track_id}" for track_id in track_ids]
-    sp.playlist_add_items(playlist_id, uris)
+    sp._post(f"playlists/{playlist_id}/items", payload={"uris": uris})

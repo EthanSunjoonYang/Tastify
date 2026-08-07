@@ -84,7 +84,7 @@ def test_generate_playlist_selects_tracks_and_stores_result(db_session: Session,
     monkeypatch.setattr(
         playlist_service,
         "create_playlist",
-        lambda sp, spotify_user_id, name, description: "playlist123",
+        lambda sp, name, description: "playlist123",
     )
 
     def _fake_add_tracks(sp, playlist_id, track_ids):
