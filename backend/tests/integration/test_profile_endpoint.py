@@ -38,8 +38,12 @@ def test_get_my_profile_builds_and_returns_profile(db_session: Session, monkeypa
         profile_service,
         "fetch_top_artists_by_range",
         lambda sp: {
-            "short_term": [{"id": "a1", "name": "Artist One"}],
-            "medium_term": [{"id": "a1", "name": "Artist One"}],
+            "short_term": [
+                {"id": "a1", "name": "Artist One", "images": [{"url": "https://img/a1.jpg"}]}
+            ],
+            "medium_term": [
+                {"id": "a1", "name": "Artist One", "images": [{"url": "https://img/a1.jpg"}]}
+            ],
             "long_term": [],
         },
     )
@@ -67,6 +71,7 @@ def test_get_my_profile_builds_and_returns_profile(db_session: Session, monkeypa
     assert body["era_vector"] == {"2010s": 1.0}
     assert body["top_artist_ids"] == {"a1": 1.0}
     assert body["artist_names"] == {"a1": "Artist One"}
+    assert body["artist_images"] == {"a1": "https://img/a1.jpg"}
     assert body["top_track_ids"] == ["t1"]
 
 

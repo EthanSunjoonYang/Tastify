@@ -43,11 +43,13 @@ def test_compare_users_builds_and_returns_comparison(db_session: Session, monkey
             era_vector={"2010s": 1.0},
             top_artist_ids={"a1": 1.0, "a2": 0.5},
             artist_names={"a1": "Shared Artist", "a2": "Only A"},
+            artist_images={"a1": "https://img/a1.jpg", "a2": "https://img/a2.jpg"},
         ),
         user_b.id: SimpleNamespace(
             era_vector={"2010s": 0.5, "2020s": 0.5},
             top_artist_ids={"a1": 0.8, "a3": 0.4},
             artist_names={"a1": "Shared Artist", "a3": "Only B"},
+            artist_images={"a1": "https://img/a1.jpg", "a3": "https://img/a3.jpg"},
         ),
     }
     monkeypatch.setattr(
@@ -80,16 +82,17 @@ def test_compare_users_builds_and_returns_comparison(db_session: Session, monkey
         {
             "artist_id": "a1",
             "name": "Shared Artist",
+            "image_url": "https://img/a1.jpg",
             "weight_a": 1.0,
             "weight_b": 0.8,
             "combined_weight": pytest.approx(1.8),
         }
     ]
     assert body["taste_gaps"]["artists_only_in_a"] == [
-        {"artist_id": "a2", "name": "Only A", "weight": 0.5}
+        {"artist_id": "a2", "name": "Only A", "image_url": "https://img/a2.jpg", "weight": 0.5}
     ]
     assert body["taste_gaps"]["artists_only_in_b"] == [
-        {"artist_id": "a3", "name": "Only B", "weight": 0.4}
+        {"artist_id": "a3", "name": "Only B", "image_url": "https://img/a3.jpg", "weight": 0.4}
     ]
     assert body["taste_gaps"]["eras_only_in_b"] == ["2020s"]
 

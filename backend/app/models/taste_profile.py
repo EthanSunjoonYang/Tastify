@@ -21,6 +21,7 @@ class TasteProfile(Base):
     era_vector: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
     top_artist_ids: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
     artist_names: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=False)
+    artist_images: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=False)
     top_track_ids: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
     track_meta: Mapped[dict[str, dict]] = mapped_column(JSONB, nullable=False)
     computed_at: Mapped[datetime] = mapped_column(

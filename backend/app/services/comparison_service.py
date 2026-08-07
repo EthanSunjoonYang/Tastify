@@ -23,18 +23,26 @@ def get_or_build_comparison(db: Session, user_a: User, user_b: User) -> Comparis
     shared_artists = comparison_engine.compute_shared_artists(
         profile_a.top_artist_ids,
         profile_a.artist_names,
+        profile_a.artist_images,
         profile_b.top_artist_ids,
         profile_b.artist_names,
+        profile_b.artist_images,
     )
     era_gaps = comparison_engine.compute_era_gaps(profile_a.era_vector, profile_b.era_vector)
     taste_gaps = {
         "eras_only_in_a": era_gaps["only_in_a"],
         "eras_only_in_b": era_gaps["only_in_b"],
         "artists_only_in_a": comparison_engine.compute_unique_artists(
-            profile_a.top_artist_ids, profile_a.artist_names, profile_b.top_artist_ids
+            profile_a.top_artist_ids,
+            profile_a.artist_names,
+            profile_a.artist_images,
+            profile_b.top_artist_ids,
         ),
         "artists_only_in_b": comparison_engine.compute_unique_artists(
-            profile_b.top_artist_ids, profile_b.artist_names, profile_a.top_artist_ids
+            profile_b.top_artist_ids,
+            profile_b.artist_names,
+            profile_b.artist_images,
+            profile_a.top_artist_ids,
         ),
     }
     era_breakdown = comparison_engine.compute_era_breakdown(

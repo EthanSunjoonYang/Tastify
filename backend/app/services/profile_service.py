@@ -28,6 +28,7 @@ def get_or_build_profile(db: Session, user: User) -> TasteProfile:
 
     artist_weights = profile_builder.compute_artist_weights(top_artists_by_range)
     artist_names = profile_builder.compute_artist_names(top_artists_by_range)
+    artist_images = profile_builder.compute_artist_images(top_artists_by_range)
     track_weights = profile_builder.compute_track_weights(top_tracks_by_range)
     era_vector = profile_builder.compute_era_vector(top_tracks_by_range, track_weights)
     top_track_ids = profile_builder.compute_top_track_pool(top_tracks_by_range)
@@ -40,6 +41,7 @@ def get_or_build_profile(db: Session, user: User) -> TasteProfile:
     existing.era_vector = era_vector
     existing.top_artist_ids = artist_weights
     existing.artist_names = artist_names
+    existing.artist_images = artist_images
     existing.top_track_ids = top_track_ids
     existing.track_meta = track_meta
     existing.computed_at = datetime.now(UTC)

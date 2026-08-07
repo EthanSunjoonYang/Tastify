@@ -64,13 +64,16 @@ def test_shared_artists_only_includes_common_ids_sorted_by_combined_weight():
     weights_b = {"a1": 0.5, "a3": 0.2}
     names_a = {"a1": "Artist One", "a2": "Artist Two"}
     names_b = {"a1": "Artist One", "a3": "Artist Three"}
+    images_a = {"a1": "https://img/a1.jpg", "a2": "https://img/a2.jpg"}
+    images_b = {"a1": "https://img/a1.jpg", "a3": "https://img/a3.jpg"}
 
-    shared = compute_shared_artists(weights_a, names_a, weights_b, names_b)
+    shared = compute_shared_artists(weights_a, names_a, images_a, weights_b, names_b, images_b)
 
     assert shared == [
         {
             "artist_id": "a1",
             "name": "Artist One",
+            "image_url": "https://img/a1.jpg",
             "weight_a": 0.9,
             "weight_b": 0.5,
             "combined_weight": pytest.approx(1.4),
@@ -81,11 +84,19 @@ def test_shared_artists_only_includes_common_ids_sorted_by_combined_weight():
 def test_unique_artists_excludes_ids_present_in_other():
     weights_source = {"a1": 0.9, "a2": 0.3}
     names_source = {"a1": "Artist One", "a2": "Artist Two"}
+    images_source = {"a1": "https://img/a1.jpg", "a2": "https://img/a2.jpg"}
     weights_other = {"a1": 0.5}
 
-    unique = compute_unique_artists(weights_source, names_source, weights_other)
+    unique = compute_unique_artists(weights_source, names_source, images_source, weights_other)
 
-    assert unique == [{"artist_id": "a2", "name": "Artist Two", "weight": 0.3}]
+    assert unique == [
+        {
+            "artist_id": "a2",
+            "name": "Artist Two",
+            "image_url": "https://img/a2.jpg",
+            "weight": 0.3,
+        }
+    ]
 
 
 def test_era_gaps_finds_decades_exclusive_to_each_side():

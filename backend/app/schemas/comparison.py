@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class SharedArtist(BaseModel):
     artist_id: str
     name: str
+    image_url: str
     weight_a: float
     weight_b: float
     combined_weight: float
@@ -15,6 +16,7 @@ class SharedArtist(BaseModel):
 class UniqueArtist(BaseModel):
     artist_id: str
     name: str
+    image_url: str
     weight: float
 
 

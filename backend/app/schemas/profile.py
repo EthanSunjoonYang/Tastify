@@ -9,5 +9,6 @@ class TasteProfileResponse(BaseModel):
     era_vector: dict[str, float]
     top_artist_ids: dict[str, float]
     artist_names: dict[str, str]
+    artist_images: dict[str, str]
     top_track_ids: list[str]
     computed_at: datetime

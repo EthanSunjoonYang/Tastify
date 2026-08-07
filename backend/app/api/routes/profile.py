@@ -23,6 +23,7 @@ def get_my_profile(user_id: UUID, db: Session = Depends(get_db)) -> TasteProfile
         era_vector=profile.era_vector,
         top_artist_ids=profile.top_artist_ids,
         artist_names=profile.artist_names,
+        artist_images=profile.artist_images,
         top_track_ids=profile.top_track_ids,
         computed_at=profile.computed_at,
     )

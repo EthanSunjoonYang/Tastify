@@ -44,6 +44,17 @@ def compute_artist_names(top_artists_by_range: dict[str, list[dict]]) -> dict[st
     return names
 
 
+def compute_artist_images(top_artists_by_range: dict[str, list[dict]]) -> dict[str, str]:
+    # Spotify orders artist images largest-first; take the smallest available
+    # since this is only ever rendered as a grid thumbnail.
+    images: dict[str, str] = {}
+    for artists in top_artists_by_range.values():
+        for artist in artists:
+            artist_images = artist.get("images") or []
+            images[artist["id"]] = artist_images[-1]["url"] if artist_images else ""
+    return images
+
+
 def compute_top_track_pool(top_tracks_by_range: dict[str, list[dict]]) -> list[str]:
     scores = _rank_weighted_scores(top_tracks_by_range)
     return [track_id for track_id, _ in sorted(scores.items(), key=lambda kv: -kv[1])]

@@ -38,13 +38,16 @@ def compute_overall_score(era_score: float, artist_score: float) -> float:
 def compute_shared_artists(
     weights_a: dict[str, float],
     names_a: dict[str, str],
+    images_a: dict[str, str],
     weights_b: dict[str, float],
     names_b: dict[str, str],
+    images_b: dict[str, str],
 ) -> list[dict]:
     shared = [
         {
             "artist_id": artist_id,
             "name": names_a.get(artist_id) or names_b.get(artist_id, ""),
+            "image_url": images_a.get(artist_id) or images_b.get(artist_id, ""),
             "weight_a": weights_a[artist_id],
             "weight_b": weights_b[artist_id],
             "combined_weight": weights_a[artist_id] + weights_b[artist_id],
@@ -58,10 +61,16 @@ def compute_shared_artists(
 def compute_unique_artists(
     weights_source: dict[str, float],
     names_source: dict[str, str],
+    images_source: dict[str, str],
     weights_other: dict[str, float],
 ) -> list[dict]:
     unique = [
-        {"artist_id": artist_id, "name": names_source.get(artist_id, ""), "weight": weight}
+        {
+            "artist_id": artist_id,
+            "name": names_source.get(artist_id, ""),
+            "image_url": images_source.get(artist_id, ""),
+            "weight": weight,
+        }
         for artist_id, weight in weights_source.items()
         if artist_id not in weights_other
     ]

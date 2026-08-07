@@ -1,6 +1,7 @@
 import pytest
 
 from app.services.profile_builder import (
+    compute_artist_images,
     compute_artist_names,
     compute_artist_weights,
     compute_era_vector,
@@ -39,6 +40,25 @@ def test_compute_artist_names_maps_id_to_name_across_ranges():
     assert compute_artist_names(top_artists_by_range) == {
         "a1": "Artist One",
         "a2": "Artist Two",
+    }
+
+
+def test_compute_artist_images_takes_smallest_available_image():
+    top_artists_by_range = {
+        "short_term": [
+            {
+                "id": "a1",
+                "images": [{"url": "https://img/a1-large.jpg"}, {"url": "https://img/a1-small.jpg"}],
+            },
+            {"id": "a2", "images": []},
+        ],
+        "medium_term": [],
+        "long_term": [],
+    }
+
+    assert compute_artist_images(top_artists_by_range) == {
+        "a1": "https://img/a1-small.jpg",
+        "a2": "",
     }
 
 
