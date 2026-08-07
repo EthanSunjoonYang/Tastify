@@ -36,6 +36,14 @@ def compute_track_weights(top_tracks_by_range: dict[str, list[dict]]) -> dict[st
     return _normalize_to_max(_rank_weighted_scores(top_tracks_by_range))
 
 
+def compute_artist_names(top_artists_by_range: dict[str, list[dict]]) -> dict[str, str]:
+    names: dict[str, str] = {}
+    for artists in top_artists_by_range.values():
+        for artist in artists:
+            names[artist["id"]] = artist.get("name", "")
+    return names
+
+
 def compute_top_track_pool(top_tracks_by_range: dict[str, list[dict]]) -> list[str]:
     scores = _rank_weighted_scores(top_tracks_by_range)
     return [track_id for track_id, _ in sorted(scores.items(), key=lambda kv: -kv[1])]

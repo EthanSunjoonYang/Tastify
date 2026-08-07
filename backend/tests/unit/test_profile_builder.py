@@ -1,6 +1,7 @@
 import pytest
 
 from app.services.profile_builder import (
+    compute_artist_names,
     compute_artist_weights,
     compute_era_vector,
     compute_top_track_pool,
@@ -25,6 +26,19 @@ def test_compute_artist_weights_combines_ranges_and_normalizes_to_top_artist():
 
 def test_compute_artist_weights_empty_input():
     assert compute_artist_weights({"short_term": [], "medium_term": [], "long_term": []}) == {}
+
+
+def test_compute_artist_names_maps_id_to_name_across_ranges():
+    top_artists_by_range = {
+        "short_term": [{"id": "a1", "name": "Artist One"}],
+        "medium_term": [{"id": "a1", "name": "Artist One"}, {"id": "a2", "name": "Artist Two"}],
+        "long_term": [],
+    }
+
+    assert compute_artist_names(top_artists_by_range) == {
+        "a1": "Artist One",
+        "a2": "Artist Two",
+    }
 
 
 def test_compute_top_track_pool_orders_by_combined_weight_descending():
