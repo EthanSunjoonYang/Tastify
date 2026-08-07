@@ -17,12 +17,14 @@ playlist exported back to Spotify.
 ## Local development
 
 1. Register a Spotify app at https://developer.spotify.com/dashboard (redirect URI:
-   `http://localhost:8000/api/auth/callback`).
+   `http://127.0.0.1:8000/api/auth/callback` -- Spotify rejects `localhost` as insecure).
 2. Copy `backend/.env.example` to `backend/.env` and fill in `SPOTIFY_CLIENT_ID`,
    `SPOTIFY_CLIENT_SECRET`, and `TOKEN_ENCRYPTION_KEY` (generate with
    `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`).
 3. `docker compose up --build`
 4. API: http://localhost:8000/api/health · Frontend: http://localhost:5173
+5. To test login, visit http://127.0.0.1:8000/api/auth/login (must be `127.0.0.1`, matching the
+   registered redirect URI -- `localhost` will fail Spotify's redirect_uri check).
 
 ## Tests
 
