@@ -4,8 +4,6 @@ from collections import defaultdict
 # recent binge, but recent enough to not anchor entirely on years-old taste.
 RANGE_WEIGHTS = {"short_term": 0.2, "medium_term": 0.5, "long_term": 0.3}
 
-AUDIO_FEATURE_KEYS = ("danceability", "energy", "valence", "tempo", "acousticness")
-
 
 def _rank_weighted_scores(items_by_range: dict[str, list[dict]]) -> dict[str, float]:
     """Combine per-range rankings into one weighted score per item id.
@@ -23,31 +21,19 @@ def _rank_weighted_scores(items_by_range: dict[str, list[dict]]) -> dict[str, fl
     return dict(scores)
 
 
-def compute_artist_weights(top_artists_by_range: dict[str, list[dict]]) -> dict[str, float]:
-    scores = _rank_weighted_scores(top_artists_by_range)
+def _normalize_to_max(scores: dict[str, float]) -> dict[str, float]:
     if not scores:
         return {}
     max_score = max(scores.values())
-    return {artist_id: score / max_score for artist_id, score in scores.items()}
+    return {key: value / max_score for key, value in scores.items()}
 
 
-def compute_genre_vector(
-    top_artists_by_range: dict[str, list[dict]], artist_weights: dict[str, float]
-) -> dict[str, float]:
-    artist_genres: dict[str, list[str]] = {}
-    for artists in top_artists_by_range.values():
-        for artist in artists:
-            artist_genres[artist["id"]] = artist.get("genres", [])
+def compute_artist_weights(top_artists_by_range: dict[str, list[dict]]) -> dict[str, float]:
+    return _normalize_to_max(_rank_weighted_scores(top_artists_by_range))
 
-    genre_totals: dict[str, float] = defaultdict(float)
-    for artist_id, weight in artist_weights.items():
-        for genre in artist_genres.get(artist_id, []):
-            genre_totals[genre] += weight
 
-    total = sum(genre_totals.values())
-    if total == 0:
-        return {}
-    return {genre: value / total for genre, value in genre_totals.items()}
+def compute_track_weights(top_tracks_by_range: dict[str, list[dict]]) -> dict[str, float]:
+    return _normalize_to_max(_rank_weighted_scores(top_tracks_by_range))
 
 
 def compute_top_track_pool(top_tracks_by_range: dict[str, list[dict]]) -> list[str]:
@@ -55,12 +41,39 @@ def compute_top_track_pool(top_tracks_by_range: dict[str, list[dict]]) -> list[s
     return [track_id for track_id, _ in sorted(scores.items(), key=lambda kv: -kv[1])]
 
 
-def compute_audio_profile(audio_features_list: list[dict]) -> dict[str, float]:
-    deduped: dict[str, dict] = {f["id"]: f for f in audio_features_list if f.get("id")}
-    if not deduped:
-        return dict.fromkeys(AUDIO_FEATURE_KEYS, 0.0)
+def _decade_bucket(release_date: str) -> str | None:
+    year_str = release_date[:4]
+    if not year_str.isdigit():
+        return None
+    return f"{(int(year_str) // 10) * 10}s"
 
-    count = len(deduped)
-    return {
-        key: sum(f[key] for f in deduped.values()) / count for key in AUDIO_FEATURE_KEYS
-    }
+
+def compute_era_vector(
+    top_tracks_by_range: dict[str, list[dict]], track_weights: dict[str, float]
+) -> dict[str, float]:
+    """Decade distribution of a user's top tracks -- the genre-vector replacement.
+
+    Spotify stopped populating genre tags on artist/album objects platform-wide
+    (verified empty across the top-artists, artist, and album endpoints), so this
+    swaps the feature space to release-year decade, which Spotify still reliably
+    returns on every track's album. Same cosine-similarity comparison downstream,
+    just a different axis: "what era do you listen to" instead of "what genre."
+    """
+    track_decades: dict[str, str] = {}
+    for tracks in top_tracks_by_range.values():
+        for track in tracks:
+            release_date = track.get("album", {}).get("release_date", "")
+            decade = _decade_bucket(release_date)
+            if decade is not None:
+                track_decades[track["id"]] = decade
+
+    decade_totals: dict[str, float] = defaultdict(float)
+    for track_id, weight in track_weights.items():
+        decade = track_decades.get(track_id)
+        if decade is not None:
+            decade_totals[decade] += weight
+
+    total = sum(decade_totals.values())
+    if total == 0:
+        return {}
+    return {decade: value / total for decade, value in decade_totals.items()}

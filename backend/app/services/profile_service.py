@@ -6,7 +6,6 @@ from app.models.taste_profile import TasteProfile
 from app.models.user import User
 from app.services import profile_builder
 from app.services.spotify_client import (
-    fetch_audio_features,
     fetch_top_artists_by_range,
     fetch_top_tracks_by_range,
     get_client,
@@ -28,18 +27,15 @@ def get_or_build_profile(db: Session, user: User) -> TasteProfile:
     top_tracks_by_range = fetch_top_tracks_by_range(sp)
 
     artist_weights = profile_builder.compute_artist_weights(top_artists_by_range)
-    genre_vector = profile_builder.compute_genre_vector(top_artists_by_range, artist_weights)
+    track_weights = profile_builder.compute_track_weights(top_tracks_by_range)
+    era_vector = profile_builder.compute_era_vector(top_tracks_by_range, track_weights)
     top_track_ids = profile_builder.compute_top_track_pool(top_tracks_by_range)
-
-    audio_features = fetch_audio_features(sp, top_track_ids)
-    audio_profile = profile_builder.compute_audio_profile(audio_features)
 
     if existing is None:
         existing = TasteProfile(user_id=user.id)
         db.add(existing)
 
-    existing.genre_vector = genre_vector
-    existing.audio_profile = audio_profile
+    existing.era_vector = era_vector
     existing.top_artist_ids = artist_weights
     existing.top_track_ids = top_track_ids
     existing.computed_at = datetime.now(UTC)

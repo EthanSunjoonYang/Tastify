@@ -18,8 +18,7 @@ class TasteProfile(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False
     )
-    genre_vector: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
-    audio_profile: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
+    era_vector: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
     top_artist_ids: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
     top_track_ids: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
     computed_at: Mapped[datetime] = mapped_column(

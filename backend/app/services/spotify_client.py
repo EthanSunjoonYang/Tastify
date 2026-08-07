@@ -6,7 +6,6 @@ from app.config import get_settings
 SCOPES = "user-top-read playlist-modify-public playlist-modify-private"
 TIME_RANGES = ("short_term", "medium_term", "long_term")
 TOP_ITEMS_LIMIT = 50
-AUDIO_FEATURES_BATCH_SIZE = 100
 
 
 def get_spotify_oauth() -> SpotifyOAuth:
@@ -45,12 +44,3 @@ def fetch_top_tracks_by_range(sp: spotipy.Spotify) -> dict[str, list[dict]]:
         ]
         for time_range in TIME_RANGES
     }
-
-
-def fetch_audio_features(sp: spotipy.Spotify, track_ids: list[str]) -> list[dict]:
-    features = []
-    for i in range(0, len(track_ids), AUDIO_FEATURES_BATCH_SIZE):
-        batch = track_ids[i : i + AUDIO_FEATURES_BATCH_SIZE]
-        results = sp.audio_features(tracks=batch)
-        features.extend(f for f in results if f is not None)
-    return features
