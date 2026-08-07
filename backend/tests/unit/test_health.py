@@ -1,8 +1,8 @@
-def test_health_check_returns_200(client):
+from fastapi.testclient import TestClient
+
+
+def test_health_returns_200(client: TestClient) -> None:
     response = client.get("/api/health")
 
     assert response.status_code == 200
-    body = response.json()
-    assert body["status"] == "ok"
-    assert body["db"] is True
-    assert body["redis"] is True
+    assert response.json() == {"status": "ok"}

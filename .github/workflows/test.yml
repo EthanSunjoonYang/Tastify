@@ -1,17 +1,36 @@
-name: Test
+name: test
 
 on:
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   backend:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spotify_comparator
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
     defaults:
       run:
         working-directory: backend
+
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/spotify_comparator
+      TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY || 'WemiXxvFkeLpopaa1P_RruozeLwBkuUZNrS9STlVh4E=' }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,10 +40,14 @@ jobs:
           cache: "pip"
           cache-dependency-path: backend/requirements.txt
 
-      - run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Lint (Ruff)
+      - name: Lint
         run: ruff check .
 
-      - name: Test (pytest)
+      - name: Run migrations
+        run: alembic upgrade head
+
+      - name: Test
         run: pytest --cov=app --cov-report=term-missing
