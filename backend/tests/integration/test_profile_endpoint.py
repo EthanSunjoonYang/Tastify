@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from spotipy.oauth2 import SpotifyOauthError
 from sqlalchemy.orm import Session
 
 import app.services.profile_service as profile_service
@@ -11,14 +12,7 @@ from app.models.taste_profile import TasteProfile
 from app.models.user import User
 
 
-def _override_get_db(session: Session):
-    def _get_db():
-        yield session
-
-    return _get_db
-
-
-def test_get_my_profile_builds_and_returns_profile(db_session: Session, monkeypatch):
+def _make_user(db_session: Session) -> User:
     user = User(
         spotify_id=f"spotify-{uuid4()}",
         display_name="Test User",
@@ -29,6 +23,18 @@ def test_get_my_profile_builds_and_returns_profile(db_session: Session, monkeypa
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
+    return user
+
+
+def _override_get_db(session: Session):
+    def _get_db():
+        yield session
+
+    return _get_db
+
+
+def test_get_my_profile_builds_and_returns_profile(db_session: Session, monkeypatch):
+    user = _make_user(db_session)
 
     monkeypatch.setattr(
         profile_service, "ensure_valid_access_token", lambda db, user: "fake-token"
@@ -79,3 +85,58 @@ def test_get_my_profile_returns_404_for_unknown_user(client: TestClient):
     response = client.get("/api/profile/me", params={"user_id": str(uuid4())})
 
     assert response.status_code == 404
+
+
+def test_get_my_profile_handles_user_with_no_listening_history(db_session: Session, monkeypatch):
+    user = _make_user(db_session)
+
+    monkeypatch.setattr(
+        profile_service, "ensure_valid_access_token", lambda db, user: "fake-token"
+    )
+    monkeypatch.setattr(profile_service, "get_client", lambda token: object())
+    monkeypatch.setattr(
+        profile_service,
+        "fetch_top_artists_by_range",
+        lambda sp: {"short_term": [], "medium_term": [], "long_term": []},
+    )
+    monkeypatch.setattr(
+        profile_service,
+        "fetch_top_tracks_by_range",
+        lambda sp: {"short_term": [], "medium_term": [], "long_term": []},
+    )
+
+    app.dependency_overrides[get_db] = _override_get_db(db_session)
+    try:
+        response = TestClient(app).get("/api/profile/me", params={"user_id": str(user.id)})
+    finally:
+        app.dependency_overrides.pop(get_db, None)
+        db_session.query(TasteProfile).filter(TasteProfile.user_id == user.id).delete()
+        db_session.query(User).filter(User.id == user.id).delete()
+        db_session.commit()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["era_vector"] == {}
+    assert body["top_artist_ids"] == {}
+    assert body["artist_names"] == {}
+    assert body["artist_images"] == {}
+    assert body["top_track_ids"] == []
+
+
+def test_get_my_profile_expired_spotify_session_returns_401(db_session: Session, monkeypatch):
+    user = _make_user(db_session)
+
+    def _raise_expired(db, user):
+        raise SpotifyOauthError("refresh token revoked")
+
+    monkeypatch.setattr(profile_service, "ensure_valid_access_token", _raise_expired)
+
+    app.dependency_overrides[get_db] = _override_get_db(db_session)
+    try:
+        response = TestClient(app).get("/api/profile/me", params={"user_id": str(user.id)})
+    finally:
+        app.dependency_overrides.pop(get_db, None)
+        db_session.query(User).filter(User.id == user.id).delete()
+        db_session.commit()
+
+    assert response.status_code == 401

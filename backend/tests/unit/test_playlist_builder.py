@@ -69,6 +69,13 @@ def test_dedupe_and_cap_respects_limit():
     assert dedupe_and_cap(track_ids, track_meta, limit=2) == ["t1", "t2"]
 
 
+def test_dedupe_and_cap_skips_track_ids_missing_metadata():
+    track_ids = ["t1", "t2"]
+    track_meta = {"t1": {"name": "A", "artist_ids": ["a1"]}}
+
+    assert dedupe_and_cap(track_ids, track_meta) == ["t1"]
+
+
 def test_build_playlist_track_ids_orders_tier1_before_tier2_and_dedupes():
     top_track_ids_a = ["t1", "t2"]
     # "filler" has no track_meta entry -- pushes t3 to rank 1 (not 0) in b, so
