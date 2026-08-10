@@ -56,3 +56,13 @@ export interface PlaylistResult {
   spotify_playlist_url: string
   playlist_track_ids: string[]
 }
+
+export interface LobbyParticipant {
+  id: string
+  display_name: string | null
+}
+
+export interface Lobby {
+  host: LobbyParticipant
+  guest: LobbyParticipant | null
+}

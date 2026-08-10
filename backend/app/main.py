@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
 
-from app.api.routes import auth, compare, health, playlist, profile
+from app.api.routes import auth, compare, health, lobby, playlist, profile
 from app.config import get_settings
 
 app = FastAPI(title="Spotify Taste Comparator")
@@ -22,6 +22,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")
 app.include_router(compare.router, prefix="/api")
 app.include_router(playlist.router, prefix="/api")
+app.include_router(lobby.router, prefix="/api")
 
 
 @app.exception_handler(SpotifyOauthError)

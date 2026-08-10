@@ -2,15 +2,18 @@
 
 Spotify Blend tells you the number. This tells you the story.
 
-Two users authenticate with Spotify; the backend pulls their listening data, computes
-compatibility via cosine similarity (genres) and Jaccard index (artists), and surfaces a full
-analytical breakdown — genre-by-genre comparison, shared/unique artists, taste gaps, and a
+Two users create a lobby, invite each other via a share link, and hit "Create Blend." The backend
+pulls their listening data, computes compatibility via cosine similarity (listening era) and
+Jaccard index (artists), and surfaces a full analytical breakdown — a compatibility score ring,
+era-by-era comparison, an artist-overlap donut, shared/unique artists, taste gaps, and a
 cohesion-scored shared playlist exported back to Spotify.
 
 Note: Spotify deprecated the Audio Features endpoint for all apps created after November 27,
-2024 (no official replacement), so the original three-pillar design (genre + artist + audio
-"vibe") was cut back to two pillars: genre cosine similarity and artist Jaccard index, reweighted
-proportionally (genre 8/15, artist 7/15) from the original 0.4/0.35 split.
+2024 (no official replacement), and separately stopped populating genre tags on artist/album
+objects platform-wide, so the original three-pillar design (genre + artist + audio "vibe") was
+cut back to two pillars: era cosine similarity (release-decade distribution, replacing genre) and
+artist Jaccard index, reweighted proportionally (era 8/15, artist 7/15) from the original
+0.4/0.35 split.
 
 ## Stack
 

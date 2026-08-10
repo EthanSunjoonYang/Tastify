@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Spinner } from '../components/Spinner'
-import { clearPendingCompareWith, getPendingCompareWith, setMyUserId } from '../session'
+import { clearPendingLobbyHost, getPendingLobbyHost, setMyUserId } from '../session'
 
 export function AuthSuccess() {
   const [searchParams] = useSearchParams()
@@ -16,10 +16,10 @@ export function AuthSuccess() {
 
     setMyUserId(userId)
 
-    const pendingCompareWith = getPendingCompareWith()
-    if (pendingCompareWith) {
-      clearPendingCompareWith()
-      navigate(`/results/${pendingCompareWith}`, { replace: true })
+    const pendingLobbyHost = getPendingLobbyHost()
+    if (pendingLobbyHost) {
+      clearPendingLobbyHost()
+      navigate(`/lobby/${pendingLobbyHost}`, { replace: true })
     } else {
       navigate('/profile', { replace: true })
     }

@@ -1,4 +1,4 @@
-import type { Comparison, PlaylistResult, TasteProfile } from '../types'
+import type { Comparison, Lobby, PlaylistResult, TasteProfile } from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api'
 
@@ -38,6 +38,16 @@ export function generatePlaylist(
   otherUserId: string,
 ): Promise<PlaylistResult> {
   return request<PlaylistResult>(`/playlist/generate/${otherUserId}?user_id=${myUserId}`, {
+    method: 'POST',
+  })
+}
+
+export function getLobby(hostUserId: string): Promise<Lobby> {
+  return request<Lobby>(`/lobby/${hostUserId}`)
+}
+
+export function joinLobby(hostUserId: string, guestUserId: string): Promise<Lobby> {
+  return request<Lobby>(`/lobby/join/${hostUserId}?user_id=${guestUserId}`, {
     method: 'POST',
   })
 }

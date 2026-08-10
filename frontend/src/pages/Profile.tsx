@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { ApiError, getProfile } from '../api/client'
 import { ArtistGrid } from '../components/ArtistGrid'
 import { ErrorState } from '../components/ErrorState'
@@ -18,7 +18,6 @@ export function Profile() {
   const myUserId = getMyUserId()
   const [profile, setProfile] = useState<TasteProfile | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!myUserId) return
@@ -58,15 +57,6 @@ export function Profile() {
       image_url: profile.artist_images[artistId] ?? '',
     }))
 
-  const shareUrl = `${window.location.origin}/compare/${myUserId}`
-
-  function copyShareLink() {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
-
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="text-2xl font-bold text-white">Your taste profile</h1>
@@ -88,26 +78,19 @@ export function Profile() {
         <ArtistGrid artists={topArtists} />
       </section>
 
-      <section className="mt-10 rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
+      <section className="mt-10 rounded-xl border border-neutral-800 bg-neutral-900/50 p-6 text-center">
         <h2 className="text-sm font-semibold tracking-wide text-neutral-400 uppercase">
           Compare with a friend
         </h2>
         <p className="mt-2 text-sm text-neutral-400">
-          Share this link -- when they log in, you'll both see your compatibility breakdown.
+          Head to your lobby to invite someone and blend your taste together.
         </p>
-        <div className="mt-4 flex gap-2">
-          <input
-            readOnly
-            value={shareUrl}
-            className="flex-1 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-300"
-          />
-          <button
-            onClick={copyShareLink}
-            className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-emerald-400"
-          >
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
-        </div>
+        <Link
+          to="/lobby"
+          className="mt-4 inline-block rounded-full bg-emerald-500 px-8 py-3 font-semibold text-black transition hover:bg-emerald-400"
+        >
+          Go to your lobby
+        </Link>
       </section>
     </div>
   )
