@@ -1,10 +1,21 @@
-FROM node:20-slim
+FROM node:20-slim AS build
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-CMD ["npm", "run", "dev", "--", "--host"]
+# Vite bakes env vars into the static bundle at build time, not runtime,
+# so the API URL has to be supplied as a build arg.
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80

@@ -46,3 +46,35 @@ ruff check .
 
 See `backend/app/` for the service layout (`api/routes`, `services`, `models`, `schemas`) and
 `backend/tests/` for the test suite. `backend/alembic/` holds database migrations.
+
+## Production Docker images
+
+`docker-compose.yml` is dev-only (hot reload, bind mounts, `frontend/Dockerfile.dev`). Each
+service also has a standalone production `Dockerfile`, verified locally end-to-end (migrations
+run automatically, non-root user, correct SPA routing):
+
+**Backend** -- runs `alembic upgrade head` then starts uvicorn (no `--reload`) as a non-root user.
+Needs `DATABASE_URL`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REDIRECT_URI`,
+`TOKEN_ENCRYPTION_KEY`, `FRONTEND_URL` at runtime (same as `.env.example`, minus `DATABASE_URL`'s
+local port).
+
+```bash
+cd backend
+docker build -t taste-comparator-backend .
+docker run -p 8000:8000 --env-file .env -e DATABASE_URL=<prod-postgres-url> taste-comparator-backend
+```
+
+**Frontend** -- multi-stage build (Vite build -> nginx serving static files with SPA fallback
+routing, so client-side routes like `/lobby/<id>` don't 404 on refresh). Vite bakes env vars into
+the bundle at build time, so `VITE_API_BASE_URL` must be passed as a *build arg*, not a runtime
+env var:
+
+```bash
+cd frontend
+docker build --build-arg VITE_API_BASE_URL=https://api.yourdomain.com -t taste-comparator-frontend .
+docker run -p 80:80 taste-comparator-frontend
+```
+
+Not yet done: actual cloud provisioning (hosting, managed Postgres, DNS/TLS, CI/CD push-to-deploy).
+The images above are ready to hand to any container host (ECS, Fly.io, Railway, Render, etc.) once
+that's decided.
