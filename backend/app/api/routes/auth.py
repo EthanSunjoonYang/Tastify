@@ -13,6 +13,13 @@ from app.services.spotify_client import get_current_profile, get_spotify_oauth
 router = APIRouter()
 
 
+def _smallest_image_url(images: list[dict] | None) -> str | None:
+    # Spotify orders images largest-first; the smallest is plenty for an avatar.
+    if not images:
+        return None
+    return images[-1].get("url")
+
+
 @router.get("/auth/login")
 def login() -> RedirectResponse:
     auth_url = get_spotify_oauth().get_authorize_url()
@@ -37,6 +44,7 @@ def callback(code: str | None = None, error: str | None = None, db: Session = De
         db.add(user)
 
     user.display_name = profile.get("display_name")
+    user.profile_image_url = _smallest_image_url(profile.get("images"))
     user.access_token = encrypt_token(token_info["access_token"])
     user.refresh_token = encrypt_token(token_info["refresh_token"])
     user.token_expires_at = expires_at

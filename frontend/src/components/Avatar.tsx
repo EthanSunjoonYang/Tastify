@@ -1,4 +1,15 @@
-export function Avatar({ name }: { name: string }) {
+export function Avatar({ name, imageUrl }: { name: string; imageUrl?: string | null }) {
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt={name}
+        className="h-12 w-12 rounded-full object-cover"
+        referrerPolicy="no-referrer"
+      />
+    )
+  }
+
   const initial = name.trim().charAt(0).toUpperCase() || '?'
 
   return (

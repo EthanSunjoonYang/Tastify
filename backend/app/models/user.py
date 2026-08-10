@@ -17,6 +17,7 @@ class User(Base):
     )
     spotify_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     display_name: Mapped[str | None] = mapped_column(String(255))
+    profile_image_url: Mapped[str | None] = mapped_column(String)
     access_token: Mapped[str] = mapped_column(String, nullable=False)
     refresh_token: Mapped[str] = mapped_column(String, nullable=False)
     token_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

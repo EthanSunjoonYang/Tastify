@@ -140,7 +140,10 @@ export function LobbyPage() {
         </p>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/50 p-4">
-            <Avatar name={lobby.host.display_name ?? 'Host'} />
+            <Avatar
+              name={lobby.host.display_name ?? 'Host'}
+              imageUrl={lobby.host.profile_image_url}
+            />
             <span className="text-white">
               {lobby.host.display_name ?? 'Host'}
               {isHost && <span className="ml-2 text-xs text-neutral-500">(you)</span>}
@@ -149,7 +152,10 @@ export function LobbyPage() {
           <div className="flex items-center gap-3 rounded-xl border border-dashed border-neutral-800 bg-neutral-900/20 p-4">
             {lobby.guest ? (
               <>
-                <Avatar name={lobby.guest.display_name ?? 'Guest'} />
+                <Avatar
+                  name={lobby.guest.display_name ?? 'Guest'}
+                  imageUrl={lobby.guest.profile_image_url}
+                />
                 <span className="text-white">
                   {lobby.guest.display_name ?? 'Guest'}
                   {!isHost && <span className="ml-2 text-xs text-neutral-500">(you)</span>}

@@ -21,6 +21,7 @@ def _make_user(db_session: Session, suffix: str) -> User:
     user = User(
         spotify_id=f"spotify-{uuid4()}",
         display_name=f"Test User {suffix}",
+        profile_image_url=f"https://img/{suffix}.jpg",
         access_token="unused",
         refresh_token="unused",
         token_expires_at=datetime.now(UTC) + timedelta(hours=1),
@@ -75,6 +76,7 @@ def test_join_lobby_sets_guest(db_session: Session):
     body = response.json()
     assert body["guest"]["id"] == str(guest_id)
     assert body["guest"]["display_name"] == "Test User Guest"
+    assert body["guest"]["profile_image_url"] == "https://img/Guest.jpg"
 
 
 def test_second_join_overwrites_previous_guest(db_session: Session):

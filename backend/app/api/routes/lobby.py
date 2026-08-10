@@ -11,14 +11,18 @@ from app.services.lobby_service import get_or_create_lobby, join_lobby
 router = APIRouter()
 
 
+def _to_participant(user: User) -> LobbyParticipant:
+    return LobbyParticipant(
+        id=user.id,
+        display_name=user.display_name,
+        profile_image_url=user.profile_image_url,
+    )
+
+
 def _to_response(host: User, guest: User | None) -> LobbyResponse:
     return LobbyResponse(
-        host=LobbyParticipant(id=host.id, display_name=host.display_name),
-        guest=(
-            LobbyParticipant(id=guest.id, display_name=guest.display_name)
-            if guest is not None
-            else None
-        ),
+        host=_to_participant(host),
+        guest=_to_participant(guest) if guest is not None else None,
     )
 
 

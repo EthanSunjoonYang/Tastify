@@ -51,7 +51,11 @@ def test_callback_creates_new_user(db_session: Session, monkeypatch):
     monkeypatch.setattr(
         auth_route,
         "get_current_profile",
-        lambda token: {"id": spotify_id, "display_name": "New Person"},
+        lambda token: {
+            "id": spotify_id,
+            "display_name": "New Person",
+            "images": [{"url": "https://img/large.jpg"}, {"url": "https://img/small.jpg"}],
+        },
     )
 
     app.dependency_overrides[get_db] = _override_get_db(db_session)
@@ -66,6 +70,7 @@ def test_callback_creates_new_user(db_session: Session, monkeypatch):
     user = db_session.query(User).filter(User.spotify_id == spotify_id).one()
     try:
         assert user.display_name == "New Person"
+        assert user.profile_image_url == "https://img/small.jpg"
         assert decrypt_token(user.access_token) == "new-access-token"
         assert decrypt_token(user.refresh_token) == "new-refresh-token"
         assert f"/auth/success?user_id={user.id}" in response.headers["location"]

@@ -60,6 +60,7 @@ export interface PlaylistResult {
 export interface LobbyParticipant {
   id: string
   display_name: string | null
+  profile_image_url: string | null
 }
 
 export interface Lobby {
