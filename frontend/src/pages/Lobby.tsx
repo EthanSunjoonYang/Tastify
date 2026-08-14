@@ -169,13 +169,19 @@ export function LobbyPage() {
       </section>
 
       <div className="mt-10 text-center">
-        <button
-          onClick={createBlend}
-          disabled={!otherUserId}
-          className="rounded-full bg-emerald-500 px-8 py-3 font-semibold text-black transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-400"
-        >
-          Create Blend
-        </button>
+        {isHost ? (
+          <button
+            onClick={createBlend}
+            disabled={!otherUserId}
+            className="rounded-full bg-emerald-500 px-8 py-3 font-semibold text-black transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-400"
+          >
+            Create Blend
+          </button>
+        ) : (
+          <p className="text-sm text-neutral-500">
+            Waiting for {lobby.host.display_name ?? 'the host'} to create the blend...
+          </p>
+        )}
       </div>
     </div>
   )
