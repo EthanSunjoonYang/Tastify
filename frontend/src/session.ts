@@ -9,6 +9,10 @@ export function setMyUserId(userId: string): void {
   localStorage.setItem(MY_USER_ID_KEY, userId)
 }
 
+export function clearMyUserId(): void {
+  localStorage.removeItem(MY_USER_ID_KEY)
+}
+
 export function getPendingLobbyHost(): string | null {
   return sessionStorage.getItem(PENDING_LOBBY_HOST_KEY)
 }

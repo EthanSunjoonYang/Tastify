@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ApiError, getProfile } from '../api/client'
 import { ArtistGrid } from '../components/ArtistGrid'
 import { ErrorState } from '../components/ErrorState'
 import { EraChart } from '../components/EraChart'
 import { Spinner } from '../components/Spinner'
-import { getMyUserId } from '../session'
+import { clearMyUserId, getMyUserId } from '../session'
 import type { TasteProfile } from '../types'
 
 const TOP_ARTISTS_DISPLAY_LIMIT = 15
@@ -16,8 +16,14 @@ function decadeSortKey(decade: string): number {
 
 export function Profile() {
   const myUserId = getMyUserId()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<TasteProfile | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  function signOut() {
+    clearMyUserId()
+    navigate('/', { replace: true })
+  }
 
   useEffect(() => {
     if (!myUserId) return
@@ -59,7 +65,15 @@ export function Profile() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
-      <h1 className="text-2xl font-bold text-white">Your taste profile</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Your taste profile</h1>
+        <button
+          onClick={signOut}
+          className="rounded-full border border-neutral-700 px-4 py-2 text-sm text-neutral-400 transition hover:border-neutral-500 hover:text-white"
+        >
+          Sign out
+        </button>
+      </div>
 
       <section className="mt-8">
         <h2 className="mb-3 text-sm font-semibold tracking-wide text-neutral-400 uppercase">
