@@ -22,6 +22,7 @@ export function LobbyPage() {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const hasJoinedRef = useRef(false)
+  const hasRedirectedRef = useRef(false)
 
   useEffect(() => {
     if (!myUserId && hostParam) {
@@ -57,6 +58,12 @@ export function LobbyPage() {
       clearInterval(intervalId)
     }
   }, [myUserId, hostUserId, isGuestEntry])
+
+  useEffect(() => {
+    if (isHost || !lobby?.blend_ready || !lobby.guest || hasRedirectedRef.current) return
+    hasRedirectedRef.current = true
+    navigate(`/results/${lobby.host.id}`)
+  }, [isHost, lobby, navigate])
 
   if (!myUserId) {
     if (!hostParam) {

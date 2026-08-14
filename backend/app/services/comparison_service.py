@@ -1,11 +1,29 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.models.comparison import Comparison
 from app.models.user import User
 from app.services import comparison_engine
 from app.services.profile_service import get_or_build_profile
+
+
+def comparison_exists(db: Session, user_id_a: UUID, user_id_b: UUID) -> bool:
+    """Cheap existence check -- unlike get_or_build_comparison, this never
+    builds profiles or hits Spotify. Safe to call from polling."""
+    return (
+        db.query(Comparison)
+        .filter(
+            or_(
+                (Comparison.user_a_id == user_id_a) & (Comparison.user_b_id == user_id_b),
+                (Comparison.user_a_id == user_id_b) & (Comparison.user_b_id == user_id_a),
+            )
+        )
+        .first()
+        is not None
+    )
 
 
 def get_or_build_comparison(db: Session, user_a: User, user_b: User) -> Comparison:

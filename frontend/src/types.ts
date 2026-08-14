@@ -66,4 +66,5 @@ export interface LobbyParticipant {
 export interface Lobby {
   host: LobbyParticipant
   guest: LobbyParticipant | null
+  blend_ready: boolean
 }

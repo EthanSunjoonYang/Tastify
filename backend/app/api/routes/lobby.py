@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models.user import User
 from app.schemas.lobby import LobbyParticipant, LobbyResponse
+from app.services.comparison_service import comparison_exists
 from app.services.lobby_service import get_or_create_lobby, join_lobby
 
 router = APIRouter()
@@ -19,10 +20,12 @@ def _to_participant(user: User) -> LobbyParticipant:
     )
 
 
-def _to_response(host: User, guest: User | None) -> LobbyResponse:
+def _to_response(db: Session, host: User, guest: User | None) -> LobbyResponse:
+    blend_ready = guest is not None and comparison_exists(db, host.id, guest.id)
     return LobbyResponse(
         host=_to_participant(host),
         guest=_to_participant(guest) if guest is not None else None,
+        blend_ready=blend_ready,
     )
 
 
@@ -34,7 +37,7 @@ def get_lobby(host_user_id: UUID, db: Session = Depends(get_db)) -> LobbyRespons
 
     lobby = get_or_create_lobby(db, host)
     guest = db.get(User, lobby.guest_user_id) if lobby.guest_user_id else None
-    return _to_response(host, guest)
+    return _to_response(db, host, guest)
 
 
 @router.post("/lobby/join/{host_user_id}", response_model=LobbyResponse)
@@ -48,4 +51,4 @@ def join(host_user_id: UUID, user_id: UUID, db: Session = Depends(get_db)) -> Lo
 
     lobby = join_lobby(db, host, guest)
     joined_guest = db.get(User, lobby.guest_user_id)
-    return _to_response(host, joined_guest)
+    return _to_response(db, host, joined_guest)

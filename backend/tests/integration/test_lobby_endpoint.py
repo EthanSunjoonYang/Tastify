@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.main import app
+from app.models.comparison import Comparison
 from app.models.lobby import Lobby
 from app.models.user import User
 
@@ -56,6 +57,7 @@ def test_get_lobby_creates_empty_lobby_for_new_host(db_session: Session):
     assert body["host"]["id"] == str(host_id)
     assert body["host"]["display_name"] == "Test User Host"
     assert body["guest"] is None
+    assert body["blend_ready"] is False
 
 
 def test_join_lobby_sets_guest(db_session: Session):
@@ -77,6 +79,7 @@ def test_join_lobby_sets_guest(db_session: Session):
     assert body["guest"]["id"] == str(guest_id)
     assert body["guest"]["display_name"] == "Test User Guest"
     assert body["guest"]["profile_image_url"] == "https://img/Guest.jpg"
+    assert body["blend_ready"] is False
 
 
 def test_second_join_overwrites_previous_guest(db_session: Session):
@@ -119,6 +122,37 @@ def test_get_lobby_returns_404_for_unknown_host(client: TestClient):
     response = client.get(f"/api/lobby/{uuid4()}")
 
     assert response.status_code == 404
+
+
+def test_get_lobby_reports_blend_ready_once_comparison_exists(db_session: Session):
+    host = _make_user(db_session, "Host")
+    guest = _make_user(db_session, "Guest")
+    host_id, guest_id = host.id, guest.id
+
+    comparison = Comparison(
+        user_a_id=host_id,
+        user_b_id=guest_id,
+        overall_score=80.0,
+        era_score=0.8,
+        artist_score=0.8,
+        shared_artists=[],
+        taste_gaps={},
+        era_breakdown=[],
+    )
+    db_session.add(comparison)
+    db_session.commit()
+
+    app.dependency_overrides[get_db] = _override_get_db(db_session)
+    try:
+        client = TestClient(app)
+        client.post(f"/api/lobby/join/{host_id}", params={"user_id": str(guest_id)})
+        response = client.get(f"/api/lobby/{host_id}")
+    finally:
+        app.dependency_overrides.pop(get_db, None)
+        db_session.query(Comparison).filter(Comparison.id == comparison.id).delete()
+        _cleanup(db_session, host_id, guest_id)
+
+    assert response.json()["blend_ready"] is True
 
 
 def test_join_lobby_returns_404_for_unknown_guest(db_session: Session):

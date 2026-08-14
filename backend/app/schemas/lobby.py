@@ -12,3 +12,4 @@ class LobbyParticipant(BaseModel):
 class LobbyResponse(BaseModel):
     host: LobbyParticipant
     guest: LobbyParticipant | None
+    blend_ready: bool
