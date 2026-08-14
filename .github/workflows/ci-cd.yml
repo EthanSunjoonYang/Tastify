@@ -30,6 +30,8 @@ jobs:
     env:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/spotify_comparator
       TOKEN_ENCRYPTION_KEY: ${{ secrets.TOKEN_ENCRYPTION_KEY || 'WemiXxvFkeLpopaa1P_RruozeLwBkuUZNrS9STlVh4E=' }}
+      SPOTIFY_CLIENT_ID: ci-test-client-id
+      SPOTIFY_CLIENT_SECRET: ci-test-client-secret
 
     steps:
       - uses: actions/checkout@v4
