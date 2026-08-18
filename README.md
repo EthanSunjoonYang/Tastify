@@ -1,5 +1,7 @@
 # Spotify Taste Comparator
 
+Demo: https://youtu.be/S9OuvXdbuVY 
+
 Spotify Blend tells you the number. This tells you the story.
 
 Two users create a lobby, invite each other via a share link, and hit "Create Blend." The backend
